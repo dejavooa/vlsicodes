@@ -1,0 +1,93 @@
+--------------------------------------------------------------------------------------------------
+
+ARCHITECTURE Behavioral OF FIFO IS
+    TYPE memory IS ARRAY(0 TO 3) OF STD_LOGIC_VECTOR(3 DOWNTO 0);
+    VARIABLE mem: memory;
+    VARIABLE r_p: INTEGER RANGE 0 TO 3 := 0;  -- Read pointer
+    VARIABLE w_p: INTEGER RANGE 0 TO 3 := 0;  -- Write pointer
+    VARIABLE overwrite : BOOLEAN := FALSE;     -- Overwrite flag
+BEGIN
+    PROCESS(RS, CLK)
+    BEGIN
+        IF RS = '1' THEN
+            DO <= "0000";  -- Reset output
+        ELSIF (CLK'EVENT AND CLK = '1') THEN
+            IF RW = '1' THEN  -- Write operation
+                IF (NOT overwrite OR w_p /= r_p) THEN
+                    mem(w_p) := DI;  -- Write data to memory
+                    IF w_p = 3 THEN
+                        w_p := 0;
+                    ELSE
+                        w_p := w_p + 1;
+                    END IF;
+                    overwrite := FALSE;  -- Reset overwrite flag
+                END IF;
+            ELSIF RW = '0' THEN  -- Read operation
+                IF (NOT overwrite OR w_p /= r_p) THEN
+                    DO <= mem(r_p);  -- Read data from memory
+                    IF r_p = 3 THEN
+                        r_p := 0;
+                        overwrite := TRUE;  -- Set overwrite flag
+                    ELSE
+                        r_p := r_p + 1;
+                    END IF;
+                END IF;
+            END IF;
+
+            -- Check if FIFO is full
+            IF w_p = r_p THEN
+                IF overwrite = TRUE THEN
+                    FULL <= '1';  -- FIFO is full
+                ELSE
+                    FULL <= '0';  -- FIFO is not full
+                END IF;
+            ELSE
+                FULL <= '0';  -- FIFO is not full
+            END IF;
+        END IF;
+    END PROCESS;
+END Behavioral;
+
+
+--------------------------------------------------------------------------------------------------
+
+-- Stimulus process
+    stimulus_process : PROCESS
+    BEGIN
+        -- Apply reset
+        RS <= '1';		
+        WAIT FOR 100 ns;
+        RS <= '0';
+
+        -- Write operations
+        RW <= '1';	 
+        DI <= "0011";
+        WAIT FOR 10 ns;
+
+        RW <= '1';	 
+        DI <= "0110";
+        WAIT FOR 10 ns;
+
+        RW <= '1';	 
+        DI <= "1100";
+        WAIT FOR 10 ns;
+
+        RW <= '1';	 
+        DI <= "1001";
+        WAIT FOR 10 ns;
+
+        -- Read operations
+        RW <= '0';	 
+        WAIT FOR 10 ns;
+
+        RW <= '0';	 
+        WAIT FOR 10 ns;
+
+        RW <= '0';	 
+        WAIT FOR 10 ns;
+
+        -- Allow for some time to observe output
+        WAIT FOR CLK_PERIOD * 10;
+        WAIT;  -- End of simulation
+
+--------------------------------------------------------------------------------------------------

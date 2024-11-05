@@ -1,0 +1,46 @@
+--------------------------------------------------------------------------------------------------
+
+ARCHITECTURE Behavioral OF modncount IS
+    SIGNAL count: STD_LOGIC_VECTOR(2 DOWNTO 0) := "000";  -- 3-bit counter signal
+BEGIN
+    PROCESS(clk)
+    BEGIN
+        IF clr = '1' THEN
+            count <= "000";  -- Reset count to 0 when clear is active
+        ELSIF rising_edge(clk) THEN
+            IF count = "100" THEN
+                count <= "000";  -- Reset to 0 after reaching the count of 4
+            ELSE
+                count <= count + 1;  -- Increment count
+            END IF;
+        END IF;
+    END PROCESS;
+    q <= count;  -- Output the count
+END Behavioral;
+
+
+--------------------------------------------------------------------------------------------------
+
+stim_proc : PROCESS
+    BEGIN
+        -- Apply clear signal
+        clr <= '1';
+        WAIT FOR 20 ns;
+        clr <= '0';
+        
+        -- Allow the counter to count for some time
+        WAIT FOR clk_period * 10;
+        
+        WAIT;  -- End of stimulus
+END PROCESS;
+
+
+--------------------------------------------------------------------------------------------------
+
+Net clk loc=”p182”;
+Net clr loc=”p102”;
+Net q(2) loc=”p165”;
+Net q(2) loc=”p166”;
+Net q(2) loc=”p167”;
+
+--------------------------------------------------------------------------------------------------

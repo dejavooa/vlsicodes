@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard Copy Buttons</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="button-container">
+        <button onclick="copyToClipboard('4_bit_ALU.txt')">4 Bit ALU</button>
+        <button onclick="copyToClipboard('USR_PIPO_PISO_SIPO.txt')">USR-PIPO-PISO-SIPO</button>
+        <button onclick="copyToClipboard('MOD-5 Counter.txt')">MOD-5 Counter</button>
+        <button onclick="copyToClipboard('FIFO-Memory.txt')">FIFO Memory</button>
+        <button onclick="copyToClipboard('LCD.txt')">LCD</button>
+        <button onclick="copyToClipboard('Full-Adder.txt')">Full Adder</button>
+    </div>
+
+    <script>
+        async function copyToClipboard(fileName) {
+            try {
+                // Fetch the content of the file
+                const response = await fetch(fileName);
+
+                // Check if the file was found
+                if (!response.ok) {
+                    throw new Error('File not found');
+                }
+
+                // Get the text content from the response
+                const text = await response.text();
+
+                // Split the text into blocks based on the delimiter
+                const blocks = text.split(/^-+$/gm); // Regex to split on lines of dashes
+
+                // Copy each block to the clipboard separately
+                for (let i = blocks.length - 1; i >= 0; i--) {
+                    const trimmedBlock = blocks[i].trim();
+                    if (trimmedBlock) { // Check if the block is not empty
+                        await navigator.clipboard.writeText(trimmedBlock);
+                        alert(`Copied data block ${i + 1}: ${trimmedBlock}`);
+                    }
+                }
+                window.close();
+            } catch (error) {
+                console.error('Failed to copy text:', error);
+                alert(`Failed to copy content of ${fileName}.`);
+            }
+        }
+    </script>
+</body>
+
+</html>

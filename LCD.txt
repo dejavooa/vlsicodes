@@ -1,0 +1,88 @@
+--------------------------------------------------------------------------------------------------
+
+ARCHITECTURE Behavioral OF lcd IS
+    TYPE state_type IS (s_init, s_cmd, s_data);  -- Reduced states
+    SIGNAL state : state_type := s_init;
+    SIGNAL count : STD_LOGIC_VECTOR(22 DOWNTO 0);  -- Clock division counter
+    SIGNAL clk1  : STD_LOGIC;                       -- Divided clock signal
+
+BEGIN
+    -- Clock division process
+    PROCESS(clk, reset)
+    BEGIN
+        IF reset = '1' THEN
+            count <= (others => '0');  -- Reset count
+        ELSIF rising_edge(clk) THEN
+            count <= count + "0001";  -- Increment count
+        END IF;
+        clk1 <= count(20);  -- Generate a slower clock
+    END PROCESS;
+
+    RW <= '0';  -- Set RW to 0 (write mode)
+
+    -- State machine process for controlling the LCD
+    PROCESS(clk1, reset)
+    BEGIN
+        IF reset = '1' THEN
+            state <= s_init;  -- Go to initial state
+        ELSIF rising_edge(clk1) THEN
+            CASE state IS
+                WHEN s_init =>
+                    RS <= '0';  -- Command mode
+                    EN <= '1';
+                    data <= "00110000";  -- Function set: 8-bit interface
+                    state <= s_cmd;  -- Transition to command state
+
+                WHEN s_cmd =>
+                    EN <= '0';  -- Enable low
+                    state <= s_data;  -- Transition to data state
+
+                WHEN s_data =>
+                    RS <= '1';  -- Data mode
+                    EN <= '1';
+                    data <= "01010011";  -- Write 'S'
+                    -- You can replace the following lines with any data you want to write
+                    state <= s_cmd;  -- Loop back to command state or add more data logic
+
+                    -- repeat for other
+                WHEN OTHERS =>
+                    state <= s_init;  -- Default to initial state
+            END CASE;
+        END IF;
+    END PROCESS;
+END Behavioral;
+
+--------------------------------------------------------------------------------------------------
+
+stimulus_process : PROCESS
+    BEGIN
+        -- Initial reset
+        reset <= '1';
+        WAIT FOR clk_period;
+        reset <= '0';
+        WAIT FOR clk_period * 5;  -- Wait to observe the initialization process
+        
+        -- Additional stimulus can be added here
+        -- For example, you could introduce more states or data to write
+
+        WAIT FOR clk_period * 10;  -- Wait to observe the output changes
+        WAIT;  -- Wait forever
+    END PROCESS;
+
+--------------------------------------------------------------------------------------------------
+
+NET data(0) LOC =P62;
+NET data(1) LOC =P63;
+NET data(2) LOC =P64;
+NET data(3) LOC =P65;
+NET data(4) LOC =P67;
+NET data(5) LOC =P68;
+NET data(6) LOC =P71;
+NET data(7) LOC =P72;
+NET Clk LOC =P183;
+NET reset LOC =P102;
+NET RS LOC =P57;
+NET EN LOC =P61;
+NET RW LOC =P58;
+
+--------------------------------------------------------------------------------------------------

@@ -1,0 +1,35 @@
+--------------------------------------------------------------------------------------------------
+
+begin
+    process (a, b, s)
+    begin
+        case s is
+            when "000" => c <= a + b;          -- Addition
+            when "001" => c <= a - b;          -- Subtraction
+            when "010" => c <= a and b;        -- AND
+            when "011" => c <= a or b;         -- OR
+            when "100" => c <= a nand b;       -- NAND
+            when "101" => c <= a nor b;        -- NOR
+            when "110" => c <= not a;          -- NOT A
+            when "111" => c <= a;              -- Pass A
+            when others => c <= (others => '0'); -- Default case
+        end case;
+    end process;
+
+
+--------------------------------------------------------------------------------------------------
+
+begin
+        -- Test case 1: Addition
+        a <= "0010"; b <= "0011"; s <= "000"; -- Expected output: "0101"
+        wait for 10 ns;
+
+        -- Test case 2: Subtraction
+        a <= "0100"; b <= "0001"; s <= "001"; -- Expected output: "0011"
+        wait for 10 ns;
+
+        -- Test case 3: AND
+        a <= "1100"; b <= "1010"; s <= "010"; -- Expected output: "1000"
+        wait for 10 ns;
+
+--------------------------------------------------------------------------------------------------

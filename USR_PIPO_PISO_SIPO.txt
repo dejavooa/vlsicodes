@@ -1,0 +1,42 @@
+--------------------------------------------------------------------------------------------------
+
+Signal reg : std_logic_vector(3 downto 0) := (others=>'0');'
+
+--------------------------------------------------------------------------------------------------
+
+begin
+  process(clk)
+  begin
+   if rising_edge(clk) then
+    case sel is 
+       when "00" => reg <= reg;
+       when "01" => reg <= si & reg(3 downto 1);
+       when "00" => reg <= reg(2 downto 1) & si;
+       when "00" => reg <= pin;
+    end case;
+   end if;
+  end process;
+
+  so<=reg(0);
+  po<=reg;
+
+--------------------------------------------------------------------------------------------------
+
+stim_proc: process
+begin
+
+pin<="1010";
+
+sel<= "00"; wait for 10ns;
+sel<= "01"; si<='1'; wait for 10ns;
+sel<= "10"; si<='0'; wait for 10ns;
+sel<= "11"; wait for 10ns;
+
+wait;
+end process;
+
+--------------------------------------------------------------------------------------------------
+
+
+
+

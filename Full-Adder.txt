@@ -1,0 +1,110 @@
+--------------------------------------------------------------------------------------------------
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity half_adder is
+    Port (
+        a : in  STD_LOGIC;
+        b : in  STD_LOGIC;
+        sum : out  STD_LOGIC;
+        carry : out  STD_LOGIC
+    );
+end half_adder;
+
+architecture Behavioral of half_adder is
+begin
+    sum <= a XOR b;       -- Sum is the XOR of inputs
+    carry <= a AND b;     -- Carry is the AND of inputs
+end Behavioral;
+
+
+
+
+--------------------------------------------------------------------------------------------------
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity fa is
+    Port (
+        a : in  STD_LOGIC;
+        b : in  STD_LOGIC;
+        cin : in  STD_LOGIC;
+        s : out  STD_LOGIC;
+        cot : out  STD_LOGIC
+    );
+end fa;
+
+architecture Structural of fa is
+    signal sum1, carry1, carry2 : STD_LOGIC;
+    
+    -- Instantiating two half adders
+    component half_adder
+        Port (
+            a : in  STD_LOGIC;
+            b : in  STD_LOGIC;
+            sum : out  STD_LOGIC;
+            carry : out  STD_LOGIC
+        );
+    end component;
+
+begin
+    -- First Half Adder
+    HA1: half_adder port map (a, b, sum1, carry1);
+    
+    -- Second Half Adder
+    HA2: half_adder port map (sum1, cin, s, carry2);
+    
+    -- Carry Out: OR the two carries
+    cot <= carry1 OR carry2;
+end Structural;
+
+
+
+--------------------------------------------------------------------------------------------------
+
+
+begin
+    UUT: fa port map (a, b, cin, s, cot);
+    
+    -- Test process
+    process
+    begin
+        -- Test case 1
+        a <= '0'; b <= '0'; cin <= '0';
+        wait for 10 ns;  -- Wait for some time to observe the outputs
+        
+        -- Test case 2
+        a <= '0'; b <= '0'; cin <= '1';
+        wait for 10 ns;
+        
+        -- Test case 3
+        a <= '0'; b <= '1'; cin <= '0';
+        wait for 10 ns;
+        
+        -- Test case 4
+        a <= '0'; b <= '1'; cin <= '1';
+        wait for 10 ns;
+        
+        -- Test case 5
+        a <= '1'; b <= '0'; cin <= '0';
+        wait for 10 ns;
+        
+        -- Test case 6
+        a <= '1'; b <= '0'; cin <= '1';
+        wait for 10 ns;
+        
+        -- Test case 7
+        a <= '1'; b <= '1'; cin <= '0';
+        wait for 10 ns;
+        
+        -- Test case 8
+        a <= '1'; b <= '1'; cin <= '1';
+        wait for 10 ns;
+
+        wait;  -- Wait indefinitely
+    end process;
+
+--------------------------------------------------------------------------------------------------
